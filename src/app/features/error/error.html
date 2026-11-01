@@ -1,0 +1,39 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-8 px-4">
+  <div class="max-w-md w-full">
+    @if (error(); as e) {
+      <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ e.frontendError.title }}</h1>
+        <p class="text-gray-500 mb-6">{{ e.frontendError.description }}</p>
+        <p class="text-xs text-gray-400 mb-6">Código: {{ e.frontendError.code }}</p>
+
+        <div class="space-y-3">
+          <button (click)="executeAction(e.frontendError.primaryButton.url)"
+            class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+            {{ e.frontendError.primaryButton.label }}
+          </button>
+
+          @if (e.frontendError.secondaryButton) {
+            <button (click)="executeAction(e.frontendError.secondaryButton!.url)"
+              class="w-full py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200">
+              {{ e.frontendError.secondaryButton!.label }}
+            </button>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="text-center">
+        <p class="text-gray-500 mb-4">Nenhum erro para exibir.</p>
+        <button (click)="executeAction('/checkout/pagamento')"
+          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+          Voltar ao pagamento
+        </button>
+      </div>
+    }
+  </div>
+</div>

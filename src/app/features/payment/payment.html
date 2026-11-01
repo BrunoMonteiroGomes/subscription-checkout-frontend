@@ -1,0 +1,118 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-lg mx-auto">
+    @if (cart(); as c) {
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Resumo do pedido</h2>
+        @for (product of c.products; track product.slug) {
+          <div class="flex justify-between items-start py-3 border-b border-gray-100 last:border-0">
+            <div>
+              <p class="font-medium text-gray-900">{{ product.name }}</p>
+              <p class="text-sm text-gray-500">{{ product.description }}</p>
+            </div>
+            <p class="font-semibold text-gray-900">
+              {{ product.price | currency:product.currency:'symbol':'1.2-2' }}
+            </p>
+          </div>
+        }
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Meio de pagamento</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          @for (method of c.paymentMethods; track method.name) {
+            <button
+              type="button"
+              (click)="selectMethod(method.name)"
+              [class]="selectedMethod() === method.name
+                ? 'border-2 border-blue-600 bg-blue-50 text-blue-700'
+                : 'border-2 border-gray-200 hover:border-gray-300 text-gray-700'"
+              class="p-4 rounded-lg text-center font-medium transition-colors">
+              {{ method.name }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (isCard) {
+        <form [formGroup]="cardForm" class="bg-white rounded-xl shadow-sm p-6 mb-6 space-y-4">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Dados do cartão</h2>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome no cartão</label>
+            <input formControlName="holderName" type="text" placeholder="Ana Souza"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            @if (cardForm.get('holderName')?.invalid && cardForm.get('holderName')?.touched) {
+              <p class="text-red-500 text-sm mt-1">Informe o nome como está no cartão.</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número do cartão</label>
+            <input formControlName="number" type="text" placeholder="4111111111114242" maxlength="19"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            @if (cardForm.get('number')?.invalid && cardForm.get('number')?.touched) {
+              <p class="text-red-500 text-sm mt-1">Informe um número válido (13 a 19 dígitos).</p>
+            }
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Validade</label>
+              <input formControlName="expiry" type="text" placeholder="12/28" maxlength="5"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+              @if (cardForm.get('expiry')?.invalid && cardForm.get('expiry')?.touched) {
+                <p class="text-red-500 text-sm mt-1">Use o formato MM/AA.</p>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+              <input formControlName="cvv" type="text" placeholder="123" maxlength="4"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+              @if (cardForm.get('cvv')?.invalid && cardForm.get('cvv')?.touched) {
+                <p class="text-red-500 text-sm mt-1">CVV deve ter 3 ou 4 dígitos.</p>
+              }
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-500">
+            Para simular recusa, use um cartão terminado em <strong>0002</strong>.
+          </p>
+        </form>
+      }
+
+      @if (!isCard) {
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Pagamento via Pix</h2>
+          @if (!pixCode()) {
+            <button (click)="generatePixCode()"
+              class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+              Gerar código Pix
+            </button>
+          } @else {
+            <div class="text-center space-y-4">
+              <div class="bg-gray-100 rounded-lg p-4">
+                <p class="text-sm text-gray-500 mb-1">Código Pix simulado</p>
+                <p class="font-mono text-lg font-bold break-all">{{ pixCode() }}</p>
+              </div>
+              <button (click)="submit()" [disabled]="isProcessing()"
+                class="w-full py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50">
+                {{ isProcessing() ? 'Processando...' : 'Concluir pagamento' }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (isCard) {
+        <button (click)="submit()" [disabled]="!formValid || isProcessing()"
+          class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-semibold text-lg hover:bg-blue-700 disabled:opacity-50">
+          {{ isProcessing() ? 'Processando...' : 'Pagar ' + (c.products[0]?.price | currency:'BRL') }}
+        </button>
+      }
+    } @else {
+      <div class="text-center py-12">
+        <p class="text-gray-500">Carregando informações do pedido...</p>
+      </div>
+    }
+  </div>
+</div>
