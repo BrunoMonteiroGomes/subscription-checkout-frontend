@@ -4,7 +4,41 @@ Frontend de checkout de assinatura, desenvolvido com [Angular CLI](https://githu
 
 A aplicação consome uma API de backend para montar o carrinho (pre-checkout), processar o pagamento (checkout) e exibir o resultado (sucesso ou erro).
 
-## Pré-requisitos
+---
+
+## 🚀 Forma mais fácil de testar (Docker, sem instalar nada)
+
+Se você quer avaliar o fluxo completo (Frontend + BFF) **sem instalar Node.js, npm, Java, Maven ou Angular CLI**, use o repositório de avaliação:
+
+**https://github.com/BrunoMonteiroGomes/subscription-checkout-evaluation**
+
+Ele contém um `docker-compose.yml` que baixa automaticamente este frontend e o BFF diretamente do GitHub, constrói as imagens e sobe os dois containers conectados.
+
+### Como rodar
+
+```bash
+git clone https://github.com/BrunoMonteiroGomes/subscription-checkout-evaluation.git
+cd subscription-checkout-evaluation
+docker compose up --build
+```
+
+Depois de alguns minutos (o primeiro build baixa dependências npm e Maven), acesse:
+
+**http://localhost:4200**
+
+O frontend estará na porta `4200` e o BFF na porta `8080`. Para parar:
+
+```bash
+docker compose down
+```
+
+> Requisitos: apenas **Docker** instalado e em execução. Nada mais.
+
+Se preferir rodar o frontend isoladamente (por exemplo, para desenvolver ou rodar testes), siga as instruções de **Pré-requisitos** e **Instalação** abaixo.
+
+---
+
+## Pré-requisitos (para rodar sem Docker)
 
 - **Node.js**: `^22.22.3`, `^24.15.0` ou `>=26.0.0` (requisito do Angular CLI 22)
 - **npm**: 11.x (o projeto declara `npm@11.19.1` em `packageManager`)
@@ -51,6 +85,8 @@ A URL base está definida em `src/app/core/services/checkout-api.service.ts` (`b
 
 > Certifique-se de que o backend permite requisições (CORS) a partir de `http://localhost:4200`.
 
+Se você não tiver o backend rodando localmente, use o repositório de avaliação (seção acima), que sobe os dois juntos.
+
 ## Rodando o projeto (servidor de desenvolvimento)
 
 ```bash
@@ -79,6 +115,15 @@ ng serve --port 4300
 | `/pagamento` | Resumo do pedido e escolha do meio de pagamento (rota padrão)          |
 | `/sucesso`   | Confirmação do pagamento (acessível apenas após um pagamento aprovado) |
 | `/erro`      | Tela de erro retornada pela API                                        |
+
+### Como simular sucesso e recusa
+
+| Cenário               | Como fazer                                                       | Resultado                          |
+| --------------------- | ---------------------------------------------------------------- | ---------------------------------- |
+| Sucesso com cartão    | Número de cartão **não** terminado em `0002` (ex.: `4111111111111111`) | Redireciona para `/sucesso`        |
+| Recusa com cartão     | Número de cartão terminado em `0002` (ex.: `4000000000000002`)   | Redireciona para `/erro`           |
+| Sucesso com Pix       | Selecionar **Pix**, gerar o código e concluir                    | Redireciona para `/sucesso`        |
+| Acesso direto a `/sucesso` | Recarregar a URL `/sucesso` sem ter pago antes              | Redireciona para `/pagamento`      |
 
 ## Scripts disponíveis
 
@@ -148,8 +193,9 @@ src/app/
 ## Problemas comuns
 
 - **Erro de versão do Node ao executar `ng`/`npm start`**: atualize o Node para uma versão listada em [Pré-requisitos](#pré-requisitos).
-- **Tela de erro ao abrir `/pagamento`**: verifique se o backend está rodando em `http://localhost:8080` e se o CORS está liberado para `http://localhost:4200`.
+- **Tela de erro ao abrir `/pagamento`**: verifique se o backend está rodando em `http://localhost:8080` e se o CORS está liberado para `http://localhost:4200`. Se estiver usando o repositório de avaliação, o backend já sobe junto.
 - **Porta 4200 em uso**: execute `ng serve --port <outra-porta>`.
+- **Build Docker falha ao baixar dependências**: verifique a conexão com a internet e se o repositório de avaliação está público.
 
 ## Recursos adicionais
 
