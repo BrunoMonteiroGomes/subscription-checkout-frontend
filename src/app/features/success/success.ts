@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { CheckoutStateService } from '../../core/services/checkout-state.service';
@@ -14,6 +14,13 @@ export class SuccessComponent {
   private router = inject(Router);
 
   success = this.state.success;
+
+  firstName = computed(() => {
+    const name = this.state.customerName()?.trim();
+    if (!name) return null;
+    const first = name.split(/\s+/)[0].toLowerCase();
+    return first.charAt(0).toUpperCase() + first.slice(1);
+  });
 
   newCheckout(): void {
     this.state.clear();
